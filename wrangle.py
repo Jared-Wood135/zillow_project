@@ -48,21 +48,31 @@ def acquire():
     Obtains the vanilla version of zillow dataframe
     '''
     query = '''
-    SELECT 
-        bedroomcnt,
-        bathroomcnt,
-        calculatedfinishedsquarefeet,
-        taxvaluedollarcnt,
-        yearbuilt,
-        taxamount,
-        fips
-    FROM 
-        properties_2017 
-    WHERE
-        propertylandusetypeid = 261'''
-    url = env.get_db_url('zillow')
-    zillow = pd.read_sql(query, url)
-    return zillow
+            SELECT
+                *
+            FROM
+                properties_2017
+                LEFT JOIN (
+                    SELECT
+                        parcelid,
+                        logerror,
+                        transactiondate
+                    FROM
+                        predictions_2017) AS A USING(parcelid)
+                LEFT JOIN propertylandusetype USING(propertylandusetypeid)
+                LEFT JOIN airconditioningtype USING(airconditioningtypeid)
+                LEFT JOIN architecturalstyletype USING(architecturalstyletypeid)
+                LEFT JOIN buildingclasstype USING(buildingclasstypeid)
+                LEFT JOIN heatingorsystemtype USING(heatingorsystemtypeid)
+                LEFT JOIN storytype USING(storytypeid)
+                LEFT JOIN typeconstructiontype USING(typeconstructiontypeid)'''
+    if os.path.exists('zillow.csv'):
+        return pd.read_csv('zillow.csv', index_col=0)
+    else:
+        url = env.get_db_url('zillow')
+        zillow = pd.read_sql(query, url)
+        zillow.to_csv('zillow.csv')
+        return pd.read_csv('zillow.csv', index_col=0)
 
 # =======================================================================================================
 # acquire END
