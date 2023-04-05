@@ -51,21 +51,29 @@ def acquire():
             SELECT
                 *
             FROM
-                properties_2017
-                LEFT JOIN (
-                    SELECT
-                        parcelid,
-                        logerror,
-                        transactiondate
-                    FROM
-                        predictions_2017) AS A USING(parcelid)
-                LEFT JOIN propertylandusetype USING(propertylandusetypeid)
-                LEFT JOIN airconditioningtype USING(airconditioningtypeid)
-                LEFT JOIN architecturalstyletype USING(architecturalstyletypeid)
-                LEFT JOIN buildingclasstype USING(buildingclasstypeid)
-                LEFT JOIN heatingorsystemtype USING(heatingorsystemtypeid)
-                LEFT JOIN storytype USING(storytypeid)
-                LEFT JOIN typeconstructiontype USING(typeconstructiontypeid)'''
+                (SELECT 
+                    parcelid, 
+                    logerror, 
+                    transactiondate 
+                FROM 
+                    predictions_2017 
+                WHERE 
+                    transactiondate LIKE '2017%') AS A
+            LEFT JOIN 
+                (SELECT 
+                    * 
+                FROM 
+                    properties_2017 
+                WHERE 
+                    propertylandusetypeid = 261 
+                    OR propertylandusetypeid = 279) AS B USING(parcelid)
+            LEFT JOIN airconditioningtype USING(airconditioningtypeid)
+            LEFT JOIN architecturalstyletype USING(architecturalstyletypeid)
+            LEFT JOIN buildingclasstype USING(buildingclasstypeid)
+            LEFT JOIN heatingorsystemtype USING(heatingorsystemtypeid)
+            LEFT JOIN propertylandusetype USING(propertylandusetypeid)
+            LEFT JOIN storytype USING(storytypeid)
+            LEFT JOIN typeconstructiontype USING(typeconstructiontypeid)'''
     if os.path.exists('zillow.csv'):
         return pd.read_csv('zillow.csv', index_col=0)
     else:
