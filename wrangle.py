@@ -6,8 +6,8 @@
 1. Orientation
 2. Imports
 3. acquire
-4. prepare
-5. wrangle_zillow
+4. prepare_mvp
+5. wrangle_zillow_mvp
 6. split
 '''
 
@@ -58,7 +58,7 @@ def acquire():
                 FROM 
                     predictions_2017 
                 WHERE 
-                    transactiondate LIKE '2017%') AS A
+                    transactiondate LIKE %s) AS A
             LEFT JOIN 
                 (SELECT 
                     * 
@@ -74,62 +74,140 @@ def acquire():
             LEFT JOIN propertylandusetype USING(propertylandusetypeid)
             LEFT JOIN storytype USING(storytypeid)
             LEFT JOIN typeconstructiontype USING(typeconstructiontypeid)'''
-    if os.path.exists('zillow.csv'):
-        return pd.read_csv('zillow.csv', index_col=0)
-    else:
-        url = env.get_db_url('zillow')
-        zillow = pd.read_sql(query, url)
-        zillow.to_csv('zillow.csv')
-        return pd.read_csv('zillow.csv', index_col=0)
+    params = ('2017%', )
+    url = env.get_db_url('zillow')
+    zillow = pd.read_sql(query, url, params=params)
+    return zillow
 
 # =======================================================================================================
 # acquire END
-# acquire TO prepare
-# prepare START
+# acquire TO prepare_mvp
+# prepare_mvp START
 # =======================================================================================================
 
-def prepare():
+def prepare_mvp():
     '''
     Takes in the vanilla zillow dataframe and returns a cleaned version that is ready for exploration
     and further analysis
     '''
     zillow = acquire()
-    zillow.bedroomcnt = zillow.bedroomcnt.fillna(3.0)
-    zillow.bedroomcnt = zillow.bedroomcnt.astype(int)
-    zillow.bathroomcnt = zillow.bathroomcnt.fillna(2.0)
-    zillow.calculatedfinishedsquarefeet = zillow.calculatedfinishedsquarefeet.fillna(1862.9)
-    zillow.taxvaluedollarcnt = zillow.taxvaluedollarcnt.fillna(461896.2)
-    zillow.yearbuilt = zillow.yearbuilt.fillna(1955)
-    zillow.yearbuilt = zillow.yearbuilt.astype(int)
-    zillow.taxamount = zillow.taxamount.fillna(5634.87)
-    zillow['state'] = 'California'
-    zillow = zillow.rename(columns={'fips' : 'county', 
-                                    'calculatedfinishedsquarefeet' : 'sqrft', 
-                                    'taxvaluedollarcnt' : 'assessedvalue',
-                                    })
-    zillow.county = np.where(zillow.county == 6037, 'Los Angeles', zillow.county)
-    zillow.county = np.where(zillow.county == '6059.0', 'Orange', zillow.county)
-    zillow.county = np.where(zillow.county == '6111.0', 'Ventura', zillow.county)
-    dummies = pd.get_dummies(zillow.drop(columns='state').select_dtypes(include='object'))
+    zillow = zillow.drop(columns=[ 
+        'typeconstructiontypeid',
+        'storytypeid',
+        'propertylandusetypeid',
+        'heatingorsystemtypeid',
+        'buildingclasstypeid',
+        'architecturalstyletypeid',
+        'airconditioningtypeid',
+        'parcelid',
+        'logerror',
+        'transactiondate',
+        'id',
+        'basementsqft',
+        'bathroomcnt',
+        'buildingqualitytypeid',
+        'calculatedbathnbr',
+        'decktypeid',
+        'finishedfloor1squarefeet',
+        'finishedsquarefeet12',
+        'finishedsquarefeet13',
+        'finishedsquarefeet15',
+        'finishedsquarefeet50',
+        'finishedsquarefeet6',
+        'fireplacecnt',
+        'garagecarcnt',
+        'garagetotalsqft',
+        'hashottuborspa',
+        'latitude',
+        'longitude',
+        'poolcnt',
+        'poolsizesum',
+        'pooltypeid10',
+        'pooltypeid2',
+        'pooltypeid7',
+        'propertycountylandusecode',
+        'propertyzoningdesc',
+        'rawcensustractandblock',
+        'regionidcity',
+        'regionidcounty',
+        'regionidneighborhood',
+        'regionidzip',
+        'roomcnt',
+        'threequarterbathnbr',
+        'unitcnt',
+        'yardbuildingsqft17',
+        'yardbuildingsqft26',
+        'numberofstories',
+        'fireplaceflag',
+        'structuretaxvaluedollarcnt',
+        'assessmentyear',
+        'landtaxvaluedollarcnt',
+        'taxamount',
+        'taxdelinquencyflag',
+        'taxdelinquencyyear',
+        'censustractandblock',
+        'airconditioningdesc',
+        'architecturalstyledesc',
+        'buildingclassdesc',
+        'heatingorsystemdesc',
+        'propertylandusedesc',
+        'storydesc',
+        'typeconstructiondesc'])
+    zillow.bedroomcnt = zillow.bedroomcnt.fillna(3.0).astype(int)
+    zillow.calculatedfinishedsquarefeet = zillow.calculatedfinishedsquarefeet.fillna(1922.89)
+    zillow.fips = zillow.fips.fillna(6037).astype(int)
+    zillow.fullbathcnt = zillow.fullbathcnt.fillna(2.0).astype(int)
+    zillow.lotsizesquarefeet = zillow.lotsizesquarefeet.fillna(11339.62)
+    zillow.yearbuilt = zillow.yearbuilt.fillna(1955).astype(int)
+    zillow.taxvaluedollarcnt = zillow.taxvaluedollarcnt.fillna(529688.16)
+    conditions = [
+        zillow.fips == 6037,
+        zillow.fips == 6059,
+        zillow.fips == 6111
+        ]
+
+    choices = [
+        'Los Angeles',
+        'Orange',
+        'Ventura'
+        ]
+    zillow.fips = np.select(conditions, choices)
+    zillow.yearbuilt = 2017 - zillow.yearbuilt
+    zillow = zillow.rename(columns={
+    'bedroomcnt' : 'bedrooms',
+    'calculatedfinishedsquarefeet' : 'home_sqft',
+    'fips' : 'county',
+    'fullbathcnt' : 'full_bathrooms',
+    'lotsizesquarefeet' : 'lotsize_sqft',
+    'yearbuilt' : 'home_age',
+    'taxvaluedollarcnt' : 'value'
+    })
+    zillow['home_lot_ratio'] = round(zillow.home_sqft / zillow.lotsize_sqft, 2)
+    dummies = pd.get_dummies(zillow.select_dtypes(include='object'))
     zillow = pd.concat([zillow, dummies], axis=1)
+    zillow = zillow.drop(columns='county')
     return zillow
 
 # =======================================================================================================
-# prepare END
-# prepare TO wrangle_zillow
-# wrangle_zillow START
+# prepare_mvp END
+# prepare_mvp TO wrangle_zillow_mvp
+# wrangle_zillow_mvp START
 # =======================================================================================================
 
-def wrangle_zillow():
+def wrangle_zillow_mvp():
     '''
-    Function that acquires and prepares the zillow dataframe for use as well as creating a csv.
+    Function that acquires, prepares, and splits the zillow dataframe for use as well as 
+    creating a csv.
     '''
     if os.path.exists('zillow.csv'):
-        return pd.read_csv('zillow.csv', index_col=0)
+        zillow = pd.read_csv('zillow.csv', index_col=0)
+        train, validate, test = split(zillow)
+        return train, validate, test
     else:
-        zillow = prepare()
+        zillow = prepare_mvp()
         zillow.to_csv('zillow.csv')
-        return pd.read_csv('zillow.csv', index_col=0)
+        train, validate, test = split(zillow)
+        return train, validate, test
     
 # =======================================================================================================
 # wrangle_zillow END
