@@ -143,9 +143,7 @@ def prepare_mvp():
         'propertylandusedesc',
         'storydesc',
         'typeconstructiondesc'])
-    zillow.bedroomcnt = zillow.bedroomcnt.fillna(3.0).astype(int)
     zillow.calculatedfinishedsquarefeet = zillow.calculatedfinishedsquarefeet.fillna(1922.89)
-    zillow.fips = zillow.fips.fillna(6037).astype(int)
     zillow.fullbathcnt = zillow.fullbathcnt.fillna(2.0).astype(int)
     zillow.lotsizesquarefeet = zillow.lotsizesquarefeet.fillna(11339.62)
     zillow.yearbuilt = zillow.yearbuilt.fillna(1955).astype(int)
