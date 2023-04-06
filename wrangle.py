@@ -9,6 +9,7 @@
 4. prepare_mvp
 5. wrangle_zillow_mvp
 6. split
+7. remove_outliers
 '''
 
 # =======================================================================================================
@@ -273,4 +274,25 @@ def sample_dataframe(train, validate, test):
 
 # =======================================================================================================
 # sample_dataframe END
+# sample_dataframe TO remove_outliers
+# remove_outliers START
+# =======================================================================================================
+
+def remove_outliers(df, col_list, k=1.5):
+    '''
+    remove outliers from a dataframe based on a list of columns using the tukey method
+    returns a single dataframe with outliers removed
+    '''
+    col_qs = {}
+    for col in col_list:
+        col_qs[col] = q1, q3 = df[col].quantile([0.25, 0.75])
+    for col in col_list:
+        iqr = col_qs[col][0.75] - col_qs[col][0.25]
+        lower_fence = col_qs[col][0.25] - (k*iqr)
+        upper_fence = col_qs[col][0.75] + (k*iqr)
+        df = df[(df[col] > lower_fence) & (df[col] < upper_fence)]
+    return df
+
+# =======================================================================================================
+# remove_outliers END
 # =======================================================================================================
