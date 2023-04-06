@@ -38,7 +38,7 @@
 <a href='#tableofcontents'>Back to 'Table of Contents'</a>
 <br><br>
 <h5>
-Using the 'telco' dataset from a SQL database, figure out what are causes to customer churn within the company.
+Using the 'zillow' dataset from a SQL database acquire properties that have a transaction date of 2017 and are single family/single family inferred homes in order to best predict the home's value.
 </h5>
 <br><br><br>
 
@@ -56,11 +56,11 @@ Using the 'telco' dataset from a SQL database, figure out what are causes to cus
 <br><br>
 <h5>
 <li>Implement Data Science Pipeline</li>
-<li>Acquire 'Telco' Dataset</li>
-<li>Prepare 'Telco' Dataset</li>
-<li>Explore 'Telco' Dataset</li>
-<li>Model 'Telco' Dataset</li>
-<li>Deliver 'Telco' Dataset</li>
+<li>Acquire 'zillow' Dataset</li>
+<li>Prepare 'zillow' Dataset</li>
+<li>Explore 'zillow' Dataset</li>
+<li>Model 'zillow' Dataset</li>
+<li>Deliver 'zillow' Dataset</li>
 </h5>
 <br><br><br>
 
@@ -80,25 +80,22 @@ Using the 'telco' dataset from a SQL database, figure out what are causes to cus
 Hypothesis:
 </b></h4>
 <h5>
-Given that 'Telco' is a company providing a cellular and internet service to consumers(People), I believe that being able to identify what is deemed as valuable to the consumer weighed by it's cost is the primary cause to customer churn.
+Given the 'zillow' dataset at hand, I believe that the location of the home, the contents of the home, as well as it's proximity to key features in the area will be a strong determining factor to accurately predict the home's value.
 </h5>
 <br>
 <h4><b>
 Questions:
 </b></h4>
 <h5>
-<li>What does telco offer</li>
-<li>What is the price of everything</li>
-<li>Are there specific services that retain better</li>
-<li>Are there specific services that retain worse</li>
-<li>Are there demographics of individuals</li>
-<li>What sort of advertisements are posted</li>
-<li>Are there customer comments for those who churned</li>
-<li>Are there customer comments for those who joined</li>
-<li>Are there timestamps for joining and leaving</li>
-<li>Are there customer satisfaction reports</li>
-<li>Are there reports of faulty services/equipment</li>
-<li>What is the situation locally(placement, access, patterns, crime, common knowledge/beliefs/morals/ethics of community)</li>
+<li>Do values correlate to the location? (State, county, city, neighborhood)</li>
+<li>Do values correlate with the amount of bedrooms and bathrooms</li>
+<li>Do values correlate with the size of the home and it's overall property</li>
+<li>Does the ratio of the home to overall sqft matter</li>
+<li>Does proximity to key features like city center, leisure, stores, etc. matter</li>
+<li>Does the local crime rate matter</li>
+<li>Does the population density matter</li>
+<li>Does proximity to job opportunity density matter</li>
+<li>Does proximity to major roads matter</li>
 </h5>
 <br><br><br>
 
@@ -118,35 +115,16 @@ Questions:
 
 | Field Name | Data Type | Data Format | Description | Example |
 | ----- | ----- | ----- | ----- | ----- |
-| gender | object | str | Defines gender of customer | 'Male' |
-| senior_citizen | int | 1, 0 | Defines customer as being of senior-citizen status or not | 1 |
-| partner | object | str | Defines customer as having a partner or not | 'Yes' |
-| dependents | object | str | Defines customer as having dependents or not | 'Yes' |
-| tenure | int | # | Defines customer's tenure in months | 12 |
-| phone_service | object | str | Defines customer as having phone service or not | 'Yes' |
-| multiple_lines | object | str | Defines customer as having multiple lines or not | 'Yes' |
-| online_security | object | str | Defines customer as having online security or not | 'Yes' |
-| online_backup | object | str | Defines customer as having online backup or not | 'Yes' |
-| device_protection | object | str | Defines customer as having device protection or not | 'Yes' |
-| tech_support | object | str | Defines customer as having tech support or not | 'Yes' |
-| streaming_tv | object | str | Defines customer as having tv streaming service or not | 'Yes' |
-| streaming_movies | object | str | Defines customer as having movie streaming service or not | 'Yes' |
-| paperless_billing | object | str | Defines customer as having paperless billing or not | 'Yes' |
-| monthly_charges | float | 00.00 | Defines customer's monthly charges in USD($) | 37.48 |
-| total_charges | float | 00.00 | Defines customer's total charges with telco company in USD($) | 7862.44 |
-| churn | object | str | Defines customer churn status within the telco company | 'Yes' |
-| churn_month | datetime | YYYY-MM-DD | Defines customer's date of churn | 2022-01-31 |
-| signup_date | datetime | YYYY-MM-DD | Defines customer's date of signing-up with the company | 2021-04-21 |
-| contract_type | object | str | Defines customer's contract type | 'Month-to-month' |
-| internet_service_type | object | str | Defines customer's internet service type | 'DSL' |
-| payment_type | object | str | Defines customer's payment type | 'Mailed Check' |
-| sign_year | object | str | Defines customer's signup year | 2021 |
-| sign_month | object | str | Defines customer's signup month | 12 |
-| sign_day | object | str | Defines customer's signup day | 21 |
-| sign_dayofweek | object | str | Defines customer's signup day-of-week | 0 (Monday) |
-| value_per_total_services | float | float | Defines the mean cost per service for the customer in USD | 12.87 |
-| value_per_total_extra_services | float | float | Defines the mean cost per extra service for the customer in USD | 12.87 |
-| DUMMY COLUMNS | uint | 0, 1 | Dummy columns generated from object columns | 0 |
+|  | object | str | Defines gender of customer | 'Male' |
+| bedrooms | float | #.# | Defines the number of bedrooms in the home | 3.0 |
+| home_sqft | float | #.# | Defines the total square footage of the home | 2444.0 |
+| full_bathrooms | int | # | Defines the number of full bathrooms in the home | 3 |
+| lotsize_sqft | float | #.# | Defines the total square footage of the lot the home resides on | 10200.0 |
+| home_age | int | # | Defines how old the home is from when it was built to 2017 | 76 |
+| value | float | #.# | TARGET VALUE - Defines the home's value | 689354.0 |
+| home_lot_ratio | float | #.# | Defines the ratio of the home size to the lot size | 0.24 |
+| DUMMY COLS | uint | 0, 1 | Binary (True, False) column for specific column name | 0 |
+
 <br><br><br>
 
 
@@ -180,26 +158,22 @@ Questions:
 <br>
 <h4><b>Explore</b></h4>
 <li>Determine best cols</li>
-<li>Do hypothesis null/alternate</li>
-<li>Stat check best cols</li>
+<li>Visualize regression lines to target variable</li>
 <li>explore.py</li>
 <li>explore.ipynb</li>
 <br>
 <h4><b>Modeling</b></h4>
-<li>Decision Tree</li>
-<li>Best model</li>
-<li>Random Forest</li>
-<li>Best model</li>
-<li>KNN</li>
-<li>Best model</li>
 <li>Linear Regression</li>
-<li>Best model</li>
-<li>TOP 3 COMPARISON</li>
+<li>LassoLars</li>
+<li>TweedieRegressor</li>
+<li>Polynomial Regression</li>
+<li>Top Model</li>
 <li>modeling.py</li>
 <li>modeling.ipynb</li>
 <br>
 <h4><b>Delivery</b></h4>
 <li>Final notebook (.ipynb)</li>
+<li>final.py</li>
 <li>Readme.md</li>
 <br><br><br>
 
@@ -236,67 +210,55 @@ Questions:
 <br><br>
 <h4><b>Key Findings:</b></h4>
 
-- Less Likely to Churn
-    - 'partner' = 'Yes'
-    - 'dependents' = 'Yes'
-    - 'online_security' = 'Yes', 'No internet service'
-    - 'online_backup = 'No internet service'
-    - 'device_protection' = 'Yes', 'No internet service'
-    - 'tech_support' = 'Yes', 'No internet service'
-    - 'streaming_tv' = 'No internet service'
-    - 'streaming_movies' = 'No internet service'
-    - 'contract_type' = 'One year', 'Two year'
-    - 'total_services' = '1', '6', '7', '8', '9'
-    - 'total_extra_services' = '0', '3', '4', '5', '6'
-- AVOID
-    - 'payment_type' = 'Electronic check'
-    - 'contract_type' = 'Month-to-month'
-    - 'total_services'= '3', '4'
-    - 'total_extra_services' = '1', '2'
+- Adds better predictive value to regression model
+    - Number of bedrooms
+    - Total sq. ft. of home
+    - Number of full bathrooms
+    - Total sq. ft. of lot the home is on
+    - The age of the home
+    - The ratio of the home and lot sq. ft.
 <br><br>
 <h4><b>Recommendations:</b></h4>
 
-- Focus advertisement efforts towards families and couples and avoid older population
-- Market offers as single services or bundled services with at least 3 additional services
-- For customers, that want internet services
-    - Get them to go with DSL services
-    - Minimum add-ons of 3
-- For paying customers:
-    - Do not allow monthly contracts
-    - Do not allow electronic check forms of payment
+- Increases value
+    - Number of bedrooms
+    - Total sq. ft. of home
+    - Number of full bathrooms
+    - The ratio of the home and lot sq. ft.
+- Decreases value
+    - The age of the home
 <br><br>
 <h4><b>Takeaways:</b></h4>
 
-- Target audience:
-    - Couples
-    - Families/Dependents
-    - Non-senior citizen
-- Services Emphasis:
-    - Internet Services:
-        - No internet or DSL
-        - If internet, then bundle at least 3 add-ons
-- Payments:
-    - DO NOT ALLOW ELECTRONIC CHECK
-- Contracts:
-    - DO NOT ALLOW MONTH CONTRACT
+- Focus for higher value
+    - More bedrooms
+    - More full bathrooms
+    - Larger home
+    - Larger home to lot ratio
 <br><br>
 <h4><b>If I Had More Time:</b></h4>
 
-- For customer service:
-    - Why does everyone only signup on the 21st of any given month/year
-    - Why did everyone churn on 31JAN2022
-    - What happened in 2021
-    - Assess customer comments/sentiment:
-        - Are our services adequate for their price
-        - Are our services performing properly or breaking
-        - Why did the customer signup/churn
-- For marketing:
-    - What are the prices of all services/bundles we provide
-    - What advertisements are we running
-- Further exploration:
-    - Why is month-to-month contract popular
-    - Why is tenure getting shorter, but monthly charges dropping
-    - Are extra services necessary or a burden
-    - Compare local competition if any
-    - Establish local 'common knowledge'/'norm'
+- Location specific
+    - Difference in states
+    - Difference in county
+    - Difference in city
+    - Difference in neighborhood
+- Proximity specific
+    - Density of schools
+    - Density of entertainment/recreation
+    - Density of landmarks/parks
+    - Density of retail
+    - Density of job opportunity
+    - Accessibility
+- Community specific
+    - Density of population
+    - Type of religion
+    - Type of residents (Young, middle, old)
+    - Type of family structures
+    - Ethnic distribution
+    - Gender distribution
+- Hazard specific
+    - Natural disaster risk (Tornado, flood, hurricane, etc.)
+    - Crime rate density
+    - Type of crime
 <br><br>
