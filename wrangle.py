@@ -50,30 +50,20 @@ def acquire():
     query = '''
             SELECT
                 *
-            FROM
-                (SELECT 
-                    parcelid, 
-                    logerror, 
-                    transactiondate 
-                FROM 
-                    predictions_2017 
-                WHERE 
-                    transactiondate LIKE %s) AS A
-            LEFT JOIN 
-                (SELECT 
-                    * 
-                FROM 
-                    properties_2017 
-                WHERE 
-                    propertylandusetypeid = 261 
-                    OR propertylandusetypeid = 279) AS B USING(parcelid)
-            LEFT JOIN airconditioningtype USING(airconditioningtypeid)
-            LEFT JOIN architecturalstyletype USING(architecturalstyletypeid)
-            LEFT JOIN buildingclasstype USING(buildingclasstypeid)
-            LEFT JOIN heatingorsystemtype USING(heatingorsystemtypeid)
-            LEFT JOIN propertylandusetype USING(propertylandusetypeid)
-            LEFT JOIN storytype USING(storytypeid)
-            LEFT JOIN typeconstructiontype USING(typeconstructiontypeid)'''
+            FROM 
+                predictions_2017
+                LEFT JOIN properties_2017 USING(parcelid)
+                LEFT JOIN airconditioningtype USING(airconditioningtypeid)
+                LEFT JOIN architecturalstyletype USING(architecturalstyletypeid)
+                LEFT JOIN buildingclasstype USING(buildingclasstypeid)
+                LEFT JOIN heatingorsystemtype USING(heatingorsystemtypeid)
+                LEFT JOIN propertylandusetype USING(propertylandusetypeid)
+                LEFT JOIN storytype USING(storytypeid)
+                LEFT JOIN typeconstructiontype USING(typeconstructiontypeid)
+            WHERE
+                (propertylandusetypeid = 261 OR propertylandusetypeid = 279)
+                AND transactiondate LIKE %s
+    '''
     params = ('2017%', )
     url = env.get_db_url('zillow')
     zillow = pd.read_sql(query, url, params=params)
@@ -227,4 +217,61 @@ def split(df):
 
 # =======================================================================================================
 # split END
+# split TO scale
+# scale START
+# =======================================================================================================
+
+def scale(train, validate, test, cols, scaler):
+    '''
+    Takes in a train, validate, test and returns the dataframes,
+    but scaled using the 'StandardScaler()'
+    '''
+    original_train = train.copy()
+    original_validate = validate.copy()
+    original_test = test.copy()
+    scale_cols = cols
+    scaler = scaler
+    scaler.fit(original_train[scale_cols])
+    original_train[scale_cols] = scaler.transform(original_train[scale_cols])
+    scaler.fit(original_validate[scale_cols])
+    original_validate[scale_cols] = scaler.transform(original_validate[scale_cols])
+    scaler.fit(original_test[scale_cols])
+    original_test[scale_cols] = scaler.transform(original_test[scale_cols])
+    new_train = original_train
+    new_validate = original_validate
+    new_test = original_test
+    return new_train, new_validate, new_test
+
+# =======================================================================================================
+# scale END
+# scale TO sample_dataframe
+# sample_dataframe START
+# =======================================================================================================
+
+def sample_dataframe(train, validate, test):
+    '''
+    Takes train, validate, test dataframes and reduces the shape to no more than 1000 rows by taking
+    the percentage of 1000/len(train) then applying that to train, validate, test dataframes.
+
+    INPUT:
+    train = Split dataframe for training
+    validate = Split dataframe for validation
+    test = Split dataframe for testing
+
+    OUTPUT:
+    train_sample = Reduced size of original split dataframe of no more than 1000 rows
+    validate_sample = Reduced size of original split dataframe of no more than 1000 rows
+    test_sample = Reduced size of original split dataframe of no more than 1000 rows
+    '''
+    ratio = 1000/len(train)
+    train_samples = int(ratio * len(train))
+    validate_samples = int(ratio * len(validate))
+    test_samples = int(ratio * len(test))
+    train_sample = train.sample(train_samples)
+    validate_sample = validate.sample(validate_samples)
+    test_sample = test.sample(test_samples)
+    return train_sample, validate_sample, test_sample
+
+# =======================================================================================================
+# sample_dataframe END
 # =======================================================================================================
