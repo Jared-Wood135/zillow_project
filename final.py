@@ -7,6 +7,7 @@
 2. Imports
 3. visual
 4. model_scores
+5. stats
 '''
 
 # =======================================================================================================
@@ -30,6 +31,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from scipy import stats
 import wrangle
 
 # =======================================================================================================
@@ -40,14 +42,15 @@ import wrangle
 
 def visual():
     '''
-    Function that returns 4 key visuals to help reinforce feature selection decision.
+    Function that returns 5 key visuals to help reinforce feature selection decision.
     '''
     train, validate, test = wrangle.wrangle_zillow_mvp()
     key_features = [
         'bedrooms',
         'home_sqft',
         'full_bathrooms',
-        'home_lot_ratio'
+        'home_lot_ratio',
+        'home_age'
     ]
     for key in key_features:
         sns.regplot(data=train, x=train[key], y='value', line_kws={'color': 'red'})
@@ -74,4 +77,31 @@ def model_scores():
 
 # =======================================================================================================
 # model_scores END
+# model_scores TO stats
+# stats START
+# =======================================================================================================
+
+def stat_testing(df):
+    '''
+    Function that returns a list of stats testing on features to determine whether or not the feature
+    can reject the null hypothesis.
+    '''
+    stat_list = df.drop(columns='value').columns.to_list()
+    alpha = 0.05
+    for col in stat_list:
+        r, p = stats.spearmanr(df['value'], df[col])
+        if p < alpha:
+            print(f'\033[32m===== REJECT NULL HYPOTHESIS! =====\033[0m')
+            print(f'\033[35mFeature:\033[0m {col}')
+            print(f'\033[35mCorrelation Value:\033[0m {r:.2f}')
+            print(f'\033[35mP-Value:\033[0m {p:.2f}\n\n')
+        else:
+            print(f'\033[31m===== ACCEPT NULL HYPOTHESIS! =====\033[0m')
+            print(f'\033[35mFeature:\033[0m {col}')
+            print(f'\033[35mCorrelation Value:\033[0m {r:.2f}')
+            print(f'\033[35mP-Value:\033[0m {p:.2f}\n\n')
+    
+
+# =======================================================================================================
+# stats END
 # =======================================================================================================
