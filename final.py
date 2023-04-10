@@ -68,10 +68,10 @@ def model_scores():
     Function that returns a table of baseline and top model scores to help reinforce model selection.
     '''
     model_dict = {
-    'model' : ['baseline', 'poly'],
-    'type' : ['baseline(mean)', 'Polynomial Regression'],
-    'rmse' : [685403.82, 491313.79],
-    'r2' : [0.00, 0.49]
+    'model' : ['baseline', 'poly', 'lr', 'tdr_pow0_a1'],
+    'type' : ['baseline(mean)', 'Polynomial Regression', 'Linear Regression', 'TweedieRegressor'],
+    'rmse' : [685403.82, 491313.79, 670163.46, 726863.46],
+    'r2' : [0.00, 0.49, 0.38, 0.27]
     }
     return pd.DataFrame(model_dict)
 
