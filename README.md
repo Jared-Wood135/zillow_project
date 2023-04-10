@@ -236,7 +236,7 @@ Questions:
     - Larger home
     - Larger home to lot ratio
 <br><br>
-<h4><b>If I Had More Time:</b></h4>
+<h4><b>Next Steps:</b></h4>
 
 - Location specific
     - Difference in states
